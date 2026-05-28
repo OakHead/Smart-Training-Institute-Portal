@@ -9,9 +9,9 @@
 		public string? Notes { get; set; }
 
 		public int StudentEnrollmentId { get; set; }
-		public StudentEnrollment StudentEnrollment { get; set; }
+		public StudentEnrollment StudentEnrollment { get; set; } = null!;
 
-		public string UpdatedById { get; set; }
-		public User UpdatedBy { get; set; }
+		public string UpdatedById { get; set; } = string.Empty;
+		public User UpdatedBy { get; set; } = null!;
 	}
 }

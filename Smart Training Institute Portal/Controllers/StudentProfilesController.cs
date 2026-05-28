@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -13,22 +12,24 @@ using Microsoft.AspNetCore.Authorization;
 namespace Smart_Training_Institute_Portal.Controllers
 {
     [Authorize(Roles = "Admin")]
-    public class DepartmentsController : Controller
+
+	public class StudentProfilesController : Controller
     {
         private readonly ApplicationDbContext _context;
 
-        public DepartmentsController(ApplicationDbContext context)
+        public StudentProfilesController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // GET: Departments
+        // GET: StudentProfiles
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Departments.ToListAsync());
+            var applicationDbContext = _context.StudentProfiles.Include(s => s.User);
+            return View(await applicationDbContext.ToListAsync());
         }
 
-        // GET: Departments/Details/5
+        // GET: StudentProfiles/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -36,39 +37,43 @@ namespace Smart_Training_Institute_Portal.Controllers
                 return NotFound();
             }
 
-            var department = await _context.Departments
+            var studentProfile = await _context.StudentProfiles
+                .Include(s => s.User)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (department == null)
+            if (studentProfile == null)
             {
                 return NotFound();
             }
 
-            return View(department);
+            return View(studentProfile);
         }
 
-        // GET: Departments/Create
+        // GET: StudentProfiles/Create
         public IActionResult Create()
         {
+            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id");
             return View();
         }
 
-        // POST: Departments/Create
+        // POST: StudentProfiles/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Name,Id,CreatedDate,UpdatedDate,DeleteDate,IsDeleted")] Department department)
+        public async Task<IActionResult> Create([Bind("StudentId,ImageUrl,DateOfBirth,GPA,UserId,Id,CreatedDate,UpdatedDate,DeleteDate,IsDeleted")] StudentProfile studentProfile)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(department);
+                _context.Add(studentProfile);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                TempData["SuccessMessage"] = "Student profile created successfully.";
+				return RedirectToAction(nameof(Index));
             }
-            return View(department);
+            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", studentProfile.UserId);
+            return View(studentProfile);
         }
 
-        // GET: Departments/Edit/5
+        // GET: StudentProfiles/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -76,22 +81,23 @@ namespace Smart_Training_Institute_Portal.Controllers
                 return NotFound();
             }
 
-            var department = await _context.Departments.FindAsync(id);
-            if (department == null)
+            var studentProfile = await _context.StudentProfiles.FindAsync(id);
+            if (studentProfile == null)
             {
                 return NotFound();
             }
-            return View(department);
+            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", studentProfile.UserId);
+            return View(studentProfile);
         }
 
-        // POST: Departments/Edit/5
+        // POST: StudentProfiles/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Name,Id,CreatedDate,UpdatedDate,DeleteDate,IsDeleted")] Department department)
+        public async Task<IActionResult> Edit(int id, [Bind("StudentId,ImageUrl,DateOfBirth,GPA,UserId,Id,CreatedDate,UpdatedDate,DeleteDate,IsDeleted")] StudentProfile studentProfile)
         {
-            if (id != department.Id)
+            if (id != studentProfile.Id)
             {
                 return NotFound();
             }
@@ -100,12 +106,13 @@ namespace Smart_Training_Institute_Portal.Controllers
             {
                 try
                 {
-                    _context.Update(department);
+                    _context.Update(studentProfile);
                     await _context.SaveChangesAsync();
-                }
+                    TempData["SuccessMessage"] = "Student profile updated successfully.";
+				}
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!DepartmentExists(department.Id))
+                    if (!StudentProfileExists(studentProfile.Id))
                     {
                         return NotFound();
                     }
@@ -116,10 +123,11 @@ namespace Smart_Training_Institute_Portal.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(department);
+            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", studentProfile.UserId);
+            return View(studentProfile);
         }
 
-        // GET: Departments/Delete/5
+        // GET: StudentProfiles/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -127,34 +135,36 @@ namespace Smart_Training_Institute_Portal.Controllers
                 return NotFound();
             }
 
-            var department = await _context.Departments
+            var studentProfile = await _context.StudentProfiles
+                .Include(s => s.User)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (department == null)
+            if (studentProfile == null)
             {
                 return NotFound();
             }
 
-            return View(department);
+            return View(studentProfile);
         }
 
-        // POST: Departments/Delete/5
+        // POST: StudentProfiles/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var department = await _context.Departments.FindAsync(id);
-            if (department != null)
+            var studentProfile = await _context.StudentProfiles.FindAsync(id);
+            if (studentProfile != null)
             {
-                _context.Departments.Remove(department);
+                _context.StudentProfiles.Remove(studentProfile);
             }
 
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            TempData["SuccessMessage"] = "Student profile deleted successfully.";
+			return RedirectToAction(nameof(Index));
         }
 
-        private bool DepartmentExists(int id)
+        private bool StudentProfileExists(int id)
         {
-            return _context.Departments.Any(e => e.Id == id);
+            return _context.StudentProfiles.Any(e => e.Id == id);
         }
     }
 }
