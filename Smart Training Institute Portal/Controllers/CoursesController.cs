@@ -34,20 +34,23 @@ namespace Smart_Training_Institute_Portal.Controllers
 
 		// GET: Courses
 		public async Task<IActionResult> Index()
-        {
-            var applicationDbContext = _context.Courses.Include(c => c.Department);
-            return View(await applicationDbContext.ToListAsync());
-        }
+		{
+			var courses = await _context.Courses
+				.Include(c => c.Department)
+				.Where(c => c.IsDeleted != true)
+				.ToListAsync();
 
-        // GET: Courses/Details/5
-        public async Task<IActionResult> Details(int? id)
+			return View(courses);
+		}
+
+		// GET: Courses/Details/5
+		public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
-
-            var course = await _context.Courses
+			var course = await _context.Courses
                 .Include(c => c.Department)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (course == null)
