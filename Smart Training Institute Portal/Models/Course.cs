@@ -11,7 +11,7 @@
 		public bool IsPublished { get; set; } = false;
 
 		public int DepartmentId { get; set; }
-		public Department Department { get; set; }
+		public Department? Department { get; set; }
 
 		public ICollection<CourseInstructor> Instructors { get; set; } = new List<CourseInstructor>();
 		public ICollection<StudentEnrollment> Enrollments { get; set; } = new List<StudentEnrollment>();

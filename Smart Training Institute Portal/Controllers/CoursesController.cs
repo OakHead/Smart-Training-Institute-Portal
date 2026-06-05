@@ -26,8 +26,8 @@ namespace Smart_Training_Institute_Portal.Controllers
         {
             var courses = await _context.Courses
                 .Include(c => c.Department)
-                .Where(c => c.IsPublished && !c.IsDeleted != true)
-                .ToListAsync();
+				.Where(c => c.IsPublished == true && c.IsDeleted != true)
+				.ToListAsync();
 
 			return View(courses);
 		}
@@ -57,85 +57,67 @@ namespace Smart_Training_Institute_Portal.Controllers
 
             return View(course);
         }
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> Save([Bind("Id,CourseCode,Title,Description,CreditHours,HoursPerWeek,Level,IsPublished,DepartmentId")] Course course)
+		{
 
-        // GET: Courses/Create
-        public IActionResult Create()
-        {
-            ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "Id");
-            return View();
-        }
+			if (!ModelState.IsValid)
+			{
+				ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "Name", course.DepartmentId);
+				return View(course.Id == 0 ? "Create" : "Edit", course);
+			}
 
-        // POST: Courses/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("CourseCode,Title,Description,CreditHours,HoursPerWeek,Level,IsPublished,DepartmentId,Id,CreatedDate,UpdatedDate,DeleteDate,IsDeleted")] Course course)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(course);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "Id", course.DepartmentId);
-            return View(course);
-        }
+			if (course.Id == 0)
+			{
+				_context.Courses.Add(course);
+			}
+			else
+			{
+				var existingCourse = await _context.Courses.FindAsync(course.Id);
 
-        // GET: Courses/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
+				if (existingCourse == null)
+				{
+					return NotFound();
+				}
 
-            var course = await _context.Courses.FindAsync(id);
-            if (course == null)
-            {
-                return NotFound();
-            }
-            ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "Id", course.DepartmentId);
-            return View(course);
-        }
+				existingCourse.CourseCode = course.CourseCode;
+				existingCourse.Title = course.Title;
+				existingCourse.Description = course.Description;
+				existingCourse.CreditHours = course.CreditHours;
+				existingCourse.HoursPerWeek = course.HoursPerWeek;
+				existingCourse.Level = course.Level;
+				existingCourse.IsPublished = course.IsPublished;
+				existingCourse.DepartmentId = course.DepartmentId;
+			}
 
-        // POST: Courses/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("CourseCode,Title,Description,CreditHours,HoursPerWeek,Level,IsPublished,DepartmentId,Id,CreatedDate,UpdatedDate,DeleteDate,IsDeleted")] Course course)
-        {
-            if (id != course.Id)
-            {
-                return NotFound();
-            }
+			await _context.SaveChangesAsync();
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(course);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!CourseExists(course.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "Id", course.DepartmentId);
-            return View(course);
-        }
+			return RedirectToAction(nameof(Index));
+		}
+		public IActionResult Create()
+		{
+			ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "Name");
+			return View("Save", new Course());
+		}
+		public async Task<IActionResult> Edit(int? id)
+		{
+			if (id == null)
+			{
+				return NotFound();
+			}
 
-        // GET: Courses/Delete/5
+			var course = await _context.Courses.FindAsync(id);
+
+			if (course == null)
+			{
+				return NotFound();
+			}
+
+			ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "Name", course.DepartmentId);
+
+			return View("Save", course);
+		}
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -153,8 +135,6 @@ namespace Smart_Training_Institute_Portal.Controllers
 
             return View(course);
         }
-
-        // POST: Courses/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
