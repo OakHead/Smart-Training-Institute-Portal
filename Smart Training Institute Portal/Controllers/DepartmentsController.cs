@@ -137,22 +137,32 @@ namespace Smart_Training_Institute_Portal.Controllers
             return View(department);
         }
 
-        // POST: Departments/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var department = await _context.Departments.FindAsync(id);
-            if (department != null)
-            {
-                _context.Departments.Remove(department);
-            }
+		// POST: Departments/Delete/5
+		[HttpPost, ActionName("Delete")]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> DeleteConfirmed(int id)
+		{
+			var hasCourses = await _context.Courses
+				.AnyAsync(c => c.DepartmentId == id && c.IsDeleted != true);
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
+			if (hasCourses)
+			{
+				TempData["Error"] = "Cannot delete this department because there are courses assigned to it.";
+				return RedirectToAction(nameof(Index));
+			}
 
-        private bool DepartmentExists(int id)
+			var department = await _context.Departments.FindAsync(id);
+
+			if (department != null)
+			{
+				_context.Departments.Remove(department);
+				await _context.SaveChangesAsync();
+			}
+
+			return RedirectToAction(nameof(Index));
+		}
+
+		private bool DepartmentExists(int id)
         {
             return _context.Departments.Any(e => e.Id == id);
         }

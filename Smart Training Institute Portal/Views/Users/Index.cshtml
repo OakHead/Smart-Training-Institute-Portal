@@ -1,0 +1,85 @@
+﻿@{
+    ViewData["Title"] = "Manage Users";
+
+    var students = ViewBag.Students as List<Smart_Training_Institute_Portal.Models.StudentProfile>;
+    var instructors = ViewBag.Instructors as List<Smart_Training_Institute_Portal.Models.InstructorProfile>;
+}
+
+<div class="container mt-4">
+    <h2 class="fw-bold">Manage Users</h2>
+    <p class="text-muted">View students and instructors details</p>
+
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-primary text-white">
+            Students
+        </div>
+
+        <div class="card-body">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Student ID</th>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>GPA</th>
+                        <th></th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var student in students)
+                    {
+                        <tr>
+                            <td>@student.StudentId</td>
+                            <td>@student.User.FullName</td>
+                            <td>@student.User.Email</td>
+                            <td>@student.GPA</td>
+                            <td class="text-end">
+                                <a asp-action="EditStudent" asp-route-id="@student.Id" class="btn btn-sm btn-outline-primary">
+                                    View / Edit
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-success text-white">
+            Instructors
+        </div>
+
+        <div class="card-body">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Instructor ID</th>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Specialization</th>
+                        <th></th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var instructor in instructors)
+                    {
+                        <tr>
+                            <td>@instructor.InstructorId</td>
+                            <td>@instructor.User.FullName</td>
+                            <td>@instructor.User.Email</td>
+                            <td>@instructor.Specialization</td>
+                            <td class="text-end">
+                                <a asp-action="EditInstructor" asp-route-id="@instructor.Id" class="btn btn-sm btn-outline-success">
+                                    View / Edit
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

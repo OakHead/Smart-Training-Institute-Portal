@@ -43,6 +43,22 @@
                         <span class="badge bg-warning text-dark">Draft</span>
                     }
                 </dd>
+                <dt class="col-sm-3">Instructors</dt>
+                <dd class="col-sm-9">
+                    @if (Model.Instructors != null && Model.Instructors.Any())
+                    {
+                        <ul>
+                            @foreach (var item in Model.Instructors)
+                            {
+                                <li>@item.InstructorProfile.User.FullName</li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <span class="text-muted">No instructors assigned</span>
+                    }
+                </dd>
             </dl>
 
             <div class="d-flex justify-content-between mt-4">

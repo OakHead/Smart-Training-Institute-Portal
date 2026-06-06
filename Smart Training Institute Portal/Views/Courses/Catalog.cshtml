@@ -1,101 +1,86 @@
 ﻿@model IEnumerable<Smart_Training_Institute_Portal.Models.Course>
 
 @{
-    ViewData["Title"] = "Catalog";
+    ViewData["Title"] = "Course Catalog";
 }
 
-<h1>Catalog</h1>
+<div class="container mt-4">
+    <div class="text-center mb-5">
+        <h1 class="fw-bold">Course Catalog</h1>
+        <p class="text-muted">Explore our available training courses</p>
+    </div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.CourseCode)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Title)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Description)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CreditHours)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.HoursPerWeek)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Level)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IsPublished)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Department)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CreatedDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.UpdatedDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DeleteDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IsDeleted)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.CourseCode)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Title)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Description)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreditHours)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.HoursPerWeek)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Level)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IsPublished)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Department.Id)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreatedDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.UpdatedDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DeleteDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IsDeleted)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info text-center">
+            No published courses are available right now.
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var item in Model)
+            {
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 shadow-sm border-0">
+                        <div class="card-body">
+                            <span class="badge bg-primary mb-2">@item.CourseCode</span>
+
+                            <h5 class="card-title fw-bold">@item.Title</h5>
+
+                            <p class="card-text text-muted">
+                                @if (!string.IsNullOrEmpty(item.Description))
+                                {
+                                    @item.Description
+                                }
+                                else
+                                {
+                                    <span>No description available.</span>
+                                }
+                            </p>
+
+                            <hr />
+
+                            <p class="mb-1">
+                                <strong>Department:</strong>
+                                @(item.Department != null ? item.Department.Name : "No Department")
+                            </p>
+
+                            <p class="mb-1">
+                                <strong>Level:</strong> @item.Level
+                            </p>
+
+                            <p class="mb-1">
+                                <strong>Credit Hours:</strong> @item.CreditHours
+                            </p>
+
+                            <p class="mb-1">
+                                <strong>Hours / Week:</strong> @item.HoursPerWeek
+                            </p>
+
+                            <p class="mb-0">
+                                <strong>Prerequisites:</strong>
+                                @if (item.Prerequisites != null && item.Prerequisites.Any())
+                                {
+                                    <span>
+                                        @string.Join(", ", item.Prerequisites.Select(p => p.Name))
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">None</span>
+                                }
+                            </p>
+                        </div>
+
+                        <div class="card-footer bg-white border-0">
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-primary w-100">
+                                View Course
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

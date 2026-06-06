@@ -8,7 +8,7 @@ namespace Smart_Training_Institute_Portal.Models
 		public string? ImageUrl { get; set; }
 		public string? Qualifications { get; set; }
 		public DateOnly? Experience { get; set; }
-		public string Specialization { get; set; }
+		public string? Specialization { get; set; }
 		public string? OfficeLocation { get; set; }
 		public string? OfficeHours { get; set; }
 

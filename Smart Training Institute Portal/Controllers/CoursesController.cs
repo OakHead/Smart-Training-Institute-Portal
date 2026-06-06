@@ -22,11 +22,12 @@ namespace Smart_Training_Institute_Portal.Controllers
         }
 
         [AllowAnonymous]
-        public async Task<IActionResult> Catalog()
-        {
-            var courses = await _context.Courses
-                .Include(c => c.Department)
-				.Where(c => c.IsPublished == true && c.IsDeleted != true)
+		public async Task<IActionResult> Catalog()
+		{
+			var courses = await _context.Courses
+				.Include(c => c.Department)
+				.Include(c => c.Prerequisites)
+				.Where(c => c.IsPublished && c.IsDeleted != true)
 				.ToListAsync();
 
 			return View(courses);
@@ -51,9 +52,14 @@ namespace Smart_Training_Institute_Portal.Controllers
                 return NotFound();
             }
 			var course = await _context.Courses
-                .Include(c => c.Department)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (course == null)
+				.Include(c => c.Department)
+				.Include(c => c.Prerequisites)
+				.Include(c => c.Instructors)
+					.ThenInclude(ci => ci.InstructorProfile)
+						.ThenInclude(ip => ip.User)
+				.FirstOrDefaultAsync(c => c.Id == id);
+
+			if (course == null)
             {
                 return NotFound();
             }
@@ -62,22 +68,42 @@ namespace Smart_Training_Institute_Portal.Controllers
         }
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Save([Bind("Id,CourseCode,Title,Description,CreditHours,HoursPerWeek,Level,IsPublished,DepartmentId")] Course course)
+		public async Task<IActionResult> Save([Bind("Id,CourseCode,Title,Description,CreditHours,HoursPerWeek,Level,IsPublished,DepartmentId")] Course course,int[] SelectedPrerequisiteIds,int[] SelectedInstructorIds)
 		{
-
 			if (!ModelState.IsValid)
 			{
 				ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "Name", course.DepartmentId);
+				ViewData["PrerequisiteIds"] = new MultiSelectList(_context.Prerequisites, "Id", "Name", SelectedPrerequisiteIds);
+
 				return View(course.Id == 0 ? "Create" : "Edit", course);
 			}
 
 			if (course.Id == 0)
 			{
+				var selectedPrerequisites = await _context.Prerequisites
+					.Where(p => SelectedPrerequisiteIds.Contains(p.Id))
+					.ToListAsync();
+
+				foreach (var prerequisite in selectedPrerequisites)
+				{
+					course.Prerequisites.Add(prerequisite);
+				}
+
+				foreach (var instructorId in SelectedInstructorIds)
+				{
+					course.Instructors.Add(new CourseInstructor
+					{
+						InstructorProfileId = instructorId
+					});
+				}
+
 				_context.Courses.Add(course);
 			}
 			else
 			{
-				var existingCourse = await _context.Courses.FindAsync(course.Id);
+				var existingCourse = await _context.Courses
+					.Include(c => c.Prerequisites)
+					.FirstOrDefaultAsync(c => c.Id == course.Id);
 
 				if (existingCourse == null)
 				{
@@ -92,6 +118,27 @@ namespace Smart_Training_Institute_Portal.Controllers
 				existingCourse.Level = course.Level;
 				existingCourse.IsPublished = course.IsPublished;
 				existingCourse.DepartmentId = course.DepartmentId;
+
+				existingCourse.Prerequisites.Clear();
+
+				var selectedPrerequisites = await _context.Prerequisites
+					.Where(p => SelectedPrerequisiteIds.Contains(p.Id))
+					.ToListAsync();
+
+				foreach (var prerequisite in selectedPrerequisites)
+				{
+					existingCourse.Prerequisites.Add(prerequisite);
+				}
+				existingCourse.Instructors.Clear();
+
+				foreach (var instructorId in SelectedInstructorIds)
+				{
+					existingCourse.Instructors.Add(new CourseInstructor
+					{
+						CourseId = existingCourse.Id,
+						InstructorProfileId = instructorId
+					});
+				}
 			}
 
 			await _context.SaveChangesAsync();
@@ -100,7 +147,12 @@ namespace Smart_Training_Institute_Portal.Controllers
 		}
 		public IActionResult Create()
 		{
+
 			ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "Name");
+			ViewData["PrerequisiteIds"] = new MultiSelectList(_context.Prerequisites, "Id", "Name");
+			ViewBag.Prerequisites = _context.Prerequisites.ToList();
+			ViewBag.Instructors = _context.InstructorProfiles.Include(i => i.User).ToList();
+
 			return View("Save", new Course());
 		}
 		public async Task<IActionResult> Edit(int? id)
@@ -110,7 +162,16 @@ namespace Smart_Training_Institute_Portal.Controllers
 				return NotFound();
 			}
 
-			var course = await _context.Courses.FindAsync(id);
+			var course = await _context.Courses
+				.Include(c => c.Prerequisites)
+				.Include(c => c.Instructors)
+					.ThenInclude(ci => ci.InstructorProfile)
+						.ThenInclude(ip => ip.User)
+				.FirstOrDefaultAsync(c => c.Id == id);
+
+			ViewBag.Instructors = await _context.InstructorProfiles
+				.Include(i => i.User)
+				.ToListAsync();
 
 			if (course == null)
 			{
@@ -118,10 +179,11 @@ namespace Smart_Training_Institute_Portal.Controllers
 			}
 
 			ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "Name", course.DepartmentId);
+			ViewBag.Prerequisites = await _context.Prerequisites.ToListAsync();
 
 			return View("Save", course);
 		}
-        public async Task<IActionResult> Delete(int? id)
+		public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
             {

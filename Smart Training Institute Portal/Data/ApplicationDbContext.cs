@@ -56,6 +56,11 @@ namespace Smart_Training_Institute_Portal.Data
 				.WithMany(u => u.GradeLogs)
 				.HasForeignKey(g => g.UpdatedById)
 				.OnDelete(DeleteBehavior.Restrict);
+			modelBuilder.Entity<Course>()
+				.HasOne(c => c.Department)
+				.WithMany(d => d.Courses)
+				.HasForeignKey(c => c.DepartmentId)
+				.OnDelete(DeleteBehavior.Restrict);
 		}
 	}
 }
