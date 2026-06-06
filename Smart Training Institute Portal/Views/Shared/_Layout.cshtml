@@ -38,7 +38,7 @@
                         @if (User.IsInRole("Instructor"))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                                <a class="nav-link" asp-controller="InstructorProfiles" asp-action="MyCourses"> My Courses </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
@@ -50,13 +50,18 @@
                         @if (User.IsInRole("Student"))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Std</a>
+                                <a class="nav-link"
+                                   asp-controller="StudentProfiles"
+                                   asp-action="MyCourses">
+                                    My Courses
+                                </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Std</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Courses" asp-action="Index">Std</a>
+                                <a class="nav-link"
+                                   asp-controller="StudentProfiles"
+                                   asp-action="PerformanceSummary">
+                                    Performance Summary
+                                </a>
                             </li>
 						}
                         @if (!User.Identity.IsAuthenticated)

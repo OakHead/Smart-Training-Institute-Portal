@@ -1,0 +1,92 @@
+﻿@model IEnumerable<Smart_Training_Institute_Portal.Models.StudentEnrollment>
+
+@{
+    ViewData["Title"] = "Course Students";
+    var course = ViewBag.Course as Smart_Training_Institute_Portal.Models.Course;
+}
+
+<div class="container mt-4">
+    <div class="mb-4">
+        <h2 class="fw-bold">@course?.Title</h2>
+        <p class="text-muted">
+            Manage enrolled students and marks
+        </p>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Success"]
+        </div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            No students enrolled in this course.
+        </div>
+    }
+    else
+    {
+        <form asp-action="UpdateMarks" method="post">
+            <input type="hidden" name="courseId" value="@course?.Id" />
+
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Student ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Mark</th>
+                                <th>Grade</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var enrollment in Model)
+                            {
+                                <tr>
+                                    <td>@enrollment.StudentProfile.StudentId</td>
+                                    <td>@enrollment.StudentProfile.User.FullName</td>
+                                    <td>@enrollment.StudentProfile.User.Email</td>
+
+                                    <td>
+                                        <input type="hidden" name="enrollmentIds" value="@enrollment.Id" />
+
+                                        <input type="number"
+                                               name="marks"
+                                               value="@enrollment.Mark"
+                                               class="form-control"
+                                               min="0"
+                                               max="100"
+                                               step="0.01" />
+                                    </td>
+
+                                    <td>
+                                        <input type="text"
+                                               name="grades"
+                                               value="@enrollment.Grade"
+                                               class="form-control"
+                                               placeholder="A, B, C..." />
+                                    </td>
+
+                                    <td>
+                                        <span class="badge bg-success">@enrollment.Status</span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+
+                    <div class="d-flex justify-content-between mt-3">
+                        <a asp-action="MyCourses" class="btn btn-secondary">Back</a>
+                        <button type="submit" class="btn btn-primary">Save Marks</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    }
+</div>

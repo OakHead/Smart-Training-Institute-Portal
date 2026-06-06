@@ -1,0 +1,53 @@
+﻿@model IEnumerable<Smart_Training_Institute_Portal.Models.StudentEnrollment>
+
+@{
+    ViewData["Title"] = "My Courses";
+}
+
+<div class="container mt-4">
+    <div class="mb-4">
+        <h2 class="fw-bold">My Courses</h2>
+        <p class="text-muted">Courses you are enrolled in</p>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            You are not enrolled in any courses yet.
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var enrollment in Model)
+            {
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 shadow-sm border-0">
+                        <div class="card-body">
+                            <span class="badge bg-primary mb-2">
+                                @enrollment.Course.CourseCode
+                            </span>
+
+                            <h5 class="card-title fw-bold">
+                                @enrollment.Course.Title
+                            </h5>
+
+                            <p class="text-muted">
+                                @(string.IsNullOrWhiteSpace(enrollment.Course.Description)
+                                                        ? "No description available."
+                                                        : enrollment.Course.Description)
+                            </p>
+
+                            <hr />
+
+                            <p><strong>Department:</strong> @enrollment.Course.Department?.Name</p>
+                            <p><strong>Level:</strong> @enrollment.Course.Level</p>
+                            <p><strong>Credit Hours:</strong> @enrollment.Course.CreditHours</p>
+                            <p><strong>Status:</strong> @enrollment.Status</p>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

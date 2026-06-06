@@ -226,5 +226,6 @@ namespace Smart_Training_Institute_Portal.Controllers
         {
             return _context.StudentEnrollments.Any(e => e.Id == id);
         }
-    }
+
+	}
 }

@@ -1,0 +1,92 @@
+﻿@model IEnumerable<Smart_Training_Institute_Portal.Models.Course>
+
+@{
+    ViewData["Title"] = "My Courses";
+}
+
+<div class="container mt-4">
+
+    <div class="mb-4">
+        <h2 class="fw-bold">My Courses</h2>
+        <p class="text-muted">
+            Courses assigned to you.
+        </p>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            No courses assigned yet.
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var course in Model)
+            {
+                <div class="col-md-4 mb-4">
+                    <div class="card shadow-sm border-0 h-100">
+
+                        <div class="card-header bg-primary text-white">
+                            @course.CourseCode
+                        </div>
+
+                        <div class="card-body">
+
+                            <h5 class="card-title">
+                                @course.Title
+                            </h5>
+
+                            <p class="card-text text-muted">
+                                @(string.IsNullOrWhiteSpace(course.Description)
+                                                        ? "No description available."
+                                                        : course.Description)
+                            </p>
+
+                            <hr />
+
+                            <p>
+                                <strong>Department:</strong>
+                                @course.Department?.Name
+                            </p>
+
+                            <p>
+                                <strong>Level:</strong>
+                                @course.Level
+                            </p>
+
+                            <p>
+                                <strong>Credit Hours:</strong>
+                                @course.CreditHours
+                            </p>
+
+                            <p>
+                                <strong>Hours Per Week:</strong>
+                                @course.HoursPerWeek
+                            </p>
+
+                        </div>
+
+                        <div class="card-footer bg-white border-0">
+                            <a asp-controller="InstructorProfiles"
+                               asp-action="CourseStudents"
+                               asp-route-courseId="@course.Id"
+                               class="btn btn-outline-primary w-100 mb-2">
+                                View Students / Marks
+                            </a>
+
+                            <a asp-controller="InstructorProfiles"
+                               asp-action="AddStudent"
+                               asp-route-courseId="@course.Id"
+                               class="btn btn-primary w-100">
+                                Add Student
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+</div>

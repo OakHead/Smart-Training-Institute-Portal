@@ -1,25 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Smart_Training_Institute_Portal.Data;
 using Smart_Training_Institute_Portal.Models;
-using Microsoft.AspNetCore.Authorization;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Smart_Training_Institute_Portal.Controllers
 {
-    [Authorize(Roles = "Admin")]
 
 	public class StudentProfilesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<User> _userManager;
 
-        public StudentProfilesController(ApplicationDbContext context)
+		public StudentProfilesController(ApplicationDbContext context, UserManager<User> userManager)
         {
             _context = context;
+			_userManager = userManager;
         }
 
         // GET: StudentProfiles
@@ -166,5 +168,74 @@ namespace Smart_Training_Institute_Portal.Controllers
         {
             return _context.StudentProfiles.Any(e => e.Id == id);
         }
-    }
+		[Authorize(Roles = "Student")]
+		public async Task<IActionResult> MyCourses()
+		{
+			var user = await _userManager.GetUserAsync(User);
+
+			var student = await _context.StudentProfiles
+				.FirstOrDefaultAsync(s => s.UserId == user.Id);
+
+			if (student == null)
+			{
+				return NotFound();
+			}
+
+			var enrollments = await _context.StudentEnrollments
+				.Include(e => e.Course)
+					.ThenInclude(c => c.Department)
+				.Include(e => e.Course)
+					.ThenInclude(c => c.Prerequisites)
+				.Where(e => e.StudentProfileId == student.Id)
+				.ToListAsync();
+
+			return View(enrollments);
+		}
+		[Authorize(Roles = "Student")]
+		public async Task<IActionResult> PerformanceSummary()
+		{
+			var user = await _userManager.GetUserAsync(User);
+
+			var student = await _context.StudentProfiles
+				.Include(s => s.User)
+				.Include(s => s.Enrollments)
+					.ThenInclude(e => e.Course)
+						.ThenInclude(c => c.Department)
+				.FirstOrDefaultAsync(s => s.UserId == user.Id);
+
+			if (student == null)
+			{
+				return NotFound();
+			}
+			decimal totalPoints = 0;
+			int gradedCourses = 0;
+
+			foreach (var enrollment in student.Enrollments)
+			{
+				if (enrollment.Mark.HasValue)
+				{
+					decimal mark = enrollment.Mark.Value;
+					decimal points;
+
+					if (mark >= 90)
+						points = 4.0m;
+					else if (mark >= 80)
+						points = 3.0m;
+					else if (mark >= 70)
+						points = 2.0m;
+					else if (mark >= 60)
+						points = 1.0m;
+					else
+						points = 0.0m;
+
+					totalPoints += points;
+					gradedCourses++;
+				}
+			}
+
+			student.GPA = gradedCourses > 0 ? totalPoints / gradedCourses : null;
+
+			return View(student);
+		}
+	}
 }
