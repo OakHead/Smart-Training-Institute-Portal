@@ -29,22 +29,16 @@
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Courses" asp-action="Index"> Manage Courses</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Departments" asp-action="Index">Manage Departments</a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Prerequisites" asp-action="Index"> Manage Prerequisites</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Instructors" asp-action="Index">Assign Insctructors</a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Departments" asp-action="Index">Manage Departments</a>
                             </li>
                         }
                         @if (User.IsInRole("Instructor"))
                         {
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="InstructorProfiles" asp-action="MyCourses"> My Courses </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Courses" asp-action="Index">Courses</a>
                             </li>
 						}
                         @if (User.IsInRole("Student"))

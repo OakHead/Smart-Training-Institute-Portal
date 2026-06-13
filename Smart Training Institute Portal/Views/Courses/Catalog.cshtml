@@ -1,6 +1,4 @@
-﻿@model IEnumerable<Smart_Training_Institute_Portal.Models.Course>
-
-@{
+﻿@{
     ViewData["Title"] = "Course Catalog";
 }
 
@@ -10,77 +8,101 @@
         <p class="text-muted">Explore our available training courses</p>
     </div>
 
-    @if (!Model.Any())
-    {
-        <div class="alert alert-info text-center">
-            No published courses are available right now.
-        </div>
-    }
-    else
-    {
-        <div class="row">
-            @foreach (var item in Model)
-            {
-                <div class="col-md-4 mb-4">
-                    <div class="card h-100 shadow-sm border-0">
-                        <div class="card-body">
-                            <span class="badge bg-primary mb-2">@item.CourseCode</span>
+    <div id="loadingMessage" class="alert alert-info text-center">
+        Loading courses...
+    </div>
 
-                            <h5 class="card-title fw-bold">@item.Title</h5>
+    <div id="emptyMessage" class="alert alert-info text-center d-none">
+        No published courses are available right now.
+    </div>
 
-                            <p class="card-text text-muted">
-                                @if (!string.IsNullOrEmpty(item.Description))
-                                {
-                                    @item.Description
-                                }
-                                else
-                                {
-                                    <span>No description available.</span>
-                                }
-                            </p>
-
-                            <hr />
-
-                            <p class="mb-1">
-                                <strong>Department:</strong>
-                                @(item.Department != null ? item.Department.Name : "No Department")
-                            </p>
-
-                            <p class="mb-1">
-                                <strong>Level:</strong> @item.Level
-                            </p>
-
-                            <p class="mb-1">
-                                <strong>Credit Hours:</strong> @item.CreditHours
-                            </p>
-
-                            <p class="mb-1">
-                                <strong>Hours / Week:</strong> @item.HoursPerWeek
-                            </p>
-
-                            <p class="mb-0">
-                                <strong>Prerequisites:</strong>
-                                @if (item.Prerequisites != null && item.Prerequisites.Any())
-                                {
-                                    <span>
-                                        @string.Join(", ", item.Prerequisites.Select(p => p.Name))
-                                    </span>
-                                }
-                                else
-                                {
-                                    <span class="text-muted">None</span>
-                                }
-                            </p>
-                        </div>
-
-                        <div class="card-footer bg-white border-0">
-                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-primary w-100">
-                                View Course
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            }
-        </div>
-    }
+    <div id="courseContainer" class="row"></div>
 </div>
+
+@section Scripts {
+    <script>
+        fetch('/api/CourseAPI')
+            .then(response => response.json())
+            .then(courses => {
+                const container = document.getElementById('courseContainer');
+                const loadingMessage = document.getElementById('loadingMessage');
+                const emptyMessage = document.getElementById('emptyMessage');
+
+                loadingMessage.classList.add('d-none');
+
+                if (courses.length === 0) {
+                    emptyMessage.classList.remove('d-none');
+                    return;
+                }
+
+                courses.forEach(course => {
+                    const prerequisites = course.prerequisites && course.prerequisites.length > 0
+                        ? course.prerequisites.join(', ')
+                        : 'None';
+
+                    const instructors = course.instructors && course.instructors.length > 0
+                        ? course.instructors.join(', ')
+                        : 'No instructors assigned';
+
+                    container.innerHTML += `
+                        <div class="col-md-4 mb-4">
+                            <div class="card h-100 shadow-sm border-0">
+                                <div class="card-body">
+                                    <span class="badge bg-primary mb-2">${course.courseCode}</span>
+
+                                    <h5 class="card-title fw-bold">${course.title}</h5>
+
+                                    <p class="card-text text-muted">
+                                        ${course.description || 'No description available.'}
+                                    </p>
+
+                                    <hr />
+
+                                    <p class="mb-1">
+                                        <strong>Department:</strong> ${course.departmentName || 'No Department'}
+                                    </p>
+
+                                    <p class="mb-1">
+                                        <strong>Level:</strong> ${course.level}
+                                    </p>
+
+                                    <p class="mb-1">
+                                        <strong>Credit Hours:</strong> ${course.creditHours}
+                                    </p>
+
+                                    <p class="mb-1">
+                                        <strong>Hours / Week:</strong> ${course.hoursPerWeek}
+                                    </p>
+
+                                    <p class="mb-1">
+                                        <strong>Instructors:</strong> ${instructors}
+                                    </p>
+
+                                    <p class="mb-0">
+                                        <strong>Prerequisites:</strong> ${prerequisites}
+                                    </p>
+                                </div>
+
+                                <div class="card-footer bg-white border-0">
+                                    <a href="/Courses/Details/${course.id}" class="btn btn-outline-primary w-100">
+                                        View Course
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            })
+            .catch(error => {
+                document.getElementById('loadingMessage').classList.add('d-none');
+
+                document.getElementById('courseContainer').innerHTML = `
+                    <div class="alert alert-danger text-center">
+                        Failed to load courses.
+                    </div>
+                `;
+
+                console.error(error);
+            });
+    </script>
+}

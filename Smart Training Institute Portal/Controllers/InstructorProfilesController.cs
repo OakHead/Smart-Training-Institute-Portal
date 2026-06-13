@@ -23,12 +23,16 @@ namespace Smart_Training_Institute_Portal.Controllers
 			_userManager = userManager;
         }
 
-        // GET: InstructorProfiles
-        public async Task<IActionResult> Index()
+		// GET: InstructorProfiles
+		[AllowAnonymous]
+		public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.InstructorProfiles.Include(i => i.User);
-            return View(await applicationDbContext.ToListAsync());
-        }
+			var instructors = await _context.InstructorProfiles
+	            .Include(i => i.User)
+	            .ToListAsync();
+
+			return View(instructors);
+		}
 
         // GET: InstructorProfiles/Details/5
         public async Task<IActionResult> Details(int? id)

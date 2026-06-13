@@ -1,8 +1,139 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container mt-5">
+
+    <div class="p-5 mb-5 bg-primary text-white rounded-4 shadow">
+        <h1 class="display-4 fw-bold">Smart Training Institute Portal</h1>
+        <p class="fs-5 mt-3">
+            Manage courses, instructors, enrollments, and academic performance through one centralized portal.
+        </p>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm border-0 text-center">
+                <div class="card-body">
+                    <h3>📚</h3>
+                    <h5>Course Catalog</h5>
+                    <p class="text-muted">Browse available published courses.</p>
+                    <a asp-controller="Courses" asp-action="Catalog" class="btn btn-outline-primary">
+                        View Catalog
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm border-0 text-center">
+                <div class="card-body">
+                    <h3>👨‍🏫</h3>
+                    <h5>Instructors</h5>
+                    <p class="text-muted">View institute instructors and their information.</p>
+                    <a asp-controller="InstructorProfiles" asp-action="Index" class="btn btn-outline-success">
+                        View Instructors
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (User.Identity.IsAuthenticated)
+    {
+        <h3 class="fw-bold mb-3">Your Dashboard</h3>
+
+        <div class="row g-4">
+
+            @if (User.IsInRole("Admin"))
+            {
+                <div class="col-md-3">
+                    <a asp-controller="Users" asp-action="Index" class="text-decoration-none">
+                        <div class="card h-100 shadow-sm border-0 text-center">
+                            <div class="card-body">
+                                <h3>👥</h3>
+                                <h5>Manage Users</h5>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="col-md-3">
+                    <a asp-controller="Courses" asp-action="Index" class="text-decoration-none">
+                        <div class="card h-100 shadow-sm border-0 text-center">
+                            <div class="card-body">
+                                <h3>📘</h3>
+                                <h5>Manage Courses</h5>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="col-md-3">
+                    <a asp-controller="Prerequisites" asp-action="Index" class="text-decoration-none">
+                        <div class="card h-100 shadow-sm border-0 text-center">
+                            <div class="card-body">
+                                <h3>✅</h3>
+                                <h5>Prerequisites</h5>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="col-md-3">
+                    <a asp-controller="Departments" asp-action="Index" class="text-decoration-none">
+                        <div class="card h-100 shadow-sm border-0 text-center">
+                            <div class="card-body">
+                                <h3>🏢</h3>
+                                <h5>Departments</h5>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            }
+
+            @if (User.IsInRole("Instructor"))
+            {
+                <div class="col-md-4">
+                    <a asp-controller="InstructorProfiles" asp-action="MyCourses" class="text-decoration-none">
+                        <div class="card h-100 shadow-sm border-0 text-center">
+                            <div class="card-body">
+                                <h3>📖</h3>
+                                <h5>My Courses</h5>
+                                <p class="text-muted">View assigned courses and manage students.</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            }
+
+            @if (User.IsInRole("Student"))
+            {
+                <div class="col-md-4">
+                    <a asp-controller="StudentProfiles" asp-action="MyCourses" class="text-decoration-none">
+                        <div class="card h-100 shadow-sm border-0 text-center">
+                            <div class="card-body">
+                                <h3>🎓</h3>
+                                <h5>My Courses</h5>
+                                <p class="text-muted">View your enrolled courses.</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="col-md-4">
+                    <a asp-controller="StudentProfiles" asp-action="PerformanceSummary" class="text-decoration-none">
+                        <div class="card h-100 shadow-sm border-0 text-center">
+                            <div class="card-body">
+                                <h3>📊</h3>
+                                <h5>Performance Summary</h5>
+                                <p class="text-muted">View your grades and GPA.</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            }
+
+        </div>
+    }
 </div>

@@ -23,8 +23,8 @@ namespace Smart_Training_Institute_Portal.Controllers.API_Controllers
 			var courses = await _context.Courses
 				.Include(c => c.Department)
 				.Include(c => c.Instructors)
-				.ThenInclude(ci => ci.InstructorProfile)
-				.ThenInclude(ip => ip.User)
+					.ThenInclude(ci => ci.InstructorProfile)
+						.ThenInclude(ip => ip.User)
 				.Include(c => c.Prerequisites)
 				.Include(c => c.Enrollments)
 				.Where(c => c.IsPublished == true && c.IsDeleted != true)
@@ -39,6 +39,7 @@ namespace Smart_Training_Institute_Portal.Controllers.API_Controllers
 					c.Level,
 					DepartmentName = c.Department.Name,
 					Instructors = c.Instructors.Select(ci => ci.InstructorProfile.User.FullName),
+					Prerequisites = c.Prerequisites.Select(p => p.Name),
 					EnrollmentCount = c.Enrollments.Count()
 				}).ToListAsync();
 			return Ok(courses);

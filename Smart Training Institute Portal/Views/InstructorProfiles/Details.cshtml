@@ -1,90 +1,75 @@
 ﻿@model Smart_Training_Institute_Portal.Models.InstructorProfile
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Instructor Details";
 }
 
-<h1>Details</h1>
+<div class="container mt-4">
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-success text-white">
+            <h4 class="mb-0">Instructor Details</h4>
+        </div>
 
-<div>
-    <h4>InstructorProfile</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.InstructorId)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.InstructorId)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ImageUrl)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ImageUrl)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Qualifications)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Qualifications)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Experience)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Experience)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Specialization)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Specialization)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.OfficeLocation)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.OfficeLocation)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.OfficeHours)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.OfficeHours)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.User)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.User.Id)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreatedDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreatedDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.UpdatedDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.UpdatedDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DeleteDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DeleteDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IsDeleted)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IsDeleted)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3 text-center">
+                    @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
+                    {
+                        <img src="@Model.ImageUrl"
+                             class="rounded-circle mb-3"
+                             style="width:140px;height:140px;object-fit:cover;" />
+                    }
+                    else
+                    {
+                        <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center mx-auto mb-3"
+                             style="width:140px;height:140px;font-size:48px;">
+                            @(Model.User?.FullName?.Substring(0, 1).ToUpper() ?? "I")
+                        </div>
+                    }
+
+                    <h4>@Model.User?.FullName</h4>
+                    <p class="text-muted">@Model.InstructorId</p>
+                </div>
+
+                <div class="col-md-9">
+                    <dl class="row">
+                        <dt class="col-sm-4">Email</dt>
+                        <dd class="col-sm-8">@Model.User?.Email</dd>
+
+                        <dt class="col-sm-4">Specialization</dt>
+                        <dd class="col-sm-8">@Model.Specialization</dd>
+
+                        <dt class="col-sm-4">Qualifications</dt>
+                        <dd class="col-sm-8">
+                            @(string.IsNullOrWhiteSpace(Model.Qualifications) ? "Not specified" : Model.Qualifications)
+                        </dd>
+
+                        <dt class="col-sm-4">Experience</dt>
+                        <dd class="col-sm-8">
+                            @(Model.Experience.HasValue? Model.Experience.Value.ToString("yyyy-MM-dd") : "Not specified")
+                        </dd>
+
+                        <dt class="col-sm-4">Office Location</dt>
+                        <dd class="col-sm-8">
+                            @(string.IsNullOrWhiteSpace(Model.OfficeLocation) ? "Not specified" : Model.OfficeLocation)
+                        </dd>
+
+                        <dt class="col-sm-4">Office Hours</dt>
+                        <dd class="col-sm-8">
+                            @(string.IsNullOrWhiteSpace(Model.OfficeHours) ? "Not specified" : Model.OfficeHours)
+                        </dd>
+                    </dl>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <a asp-action="Index" class="btn btn-secondary">Back to Instructors</a>
+
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

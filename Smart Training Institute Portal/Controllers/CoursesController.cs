@@ -24,13 +24,7 @@ namespace Smart_Training_Institute_Portal.Controllers
         [AllowAnonymous]
 		public async Task<IActionResult> Catalog()
 		{
-			var courses = await _context.Courses
-				.Include(c => c.Department)
-				.Include(c => c.Prerequisites)
-				.Where(c => c.IsPublished && c.IsDeleted != true)
-				.ToListAsync();
-
-			return View(courses);
+			return View();
 		}
 
 		// GET: Courses
@@ -45,6 +39,7 @@ namespace Smart_Training_Institute_Portal.Controllers
 		}
 
 		// GET: Courses/Details/5
+		[AllowAnonymous]
 		public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -103,6 +98,7 @@ namespace Smart_Training_Institute_Portal.Controllers
 			{
 				var existingCourse = await _context.Courses
 					.Include(c => c.Prerequisites)
+					.Include(c => c.Instructors)
 					.FirstOrDefaultAsync(c => c.Id == course.Id);
 
 				if (existingCourse == null)

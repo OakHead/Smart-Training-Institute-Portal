@@ -59,6 +59,22 @@
                         <span class="text-muted">No instructors assigned</span>
                     }
                 </dd>
+                <dt class="col-sm-3">Prerequisites</dt>
+                <dd class="col-sm-9">
+                    @if (Model.Prerequisites != null && Model.Prerequisites.Any())
+                    {
+                        <ul>
+                            @foreach (var prerequisite in Model.Prerequisites)
+                            {
+                                <li>@prerequisite.Name</li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <span class="text-muted">No prerequisites</span>
+                    }
+                </dd>
             </dl>
 
             <div class="d-flex justify-content-between mt-4">
