@@ -334,4 +334,74 @@ public class UsersController : Controller
 
 		return RedirectToAction(nameof(Index));
 	}
+	[HttpPost]
+	[ValidateAntiForgeryToken]
+	public async Task<IActionResult> DeleteStudent(int id)
+	{
+		var student = await _context.StudentProfiles
+			.Include(s => s.User)
+			.FirstOrDefaultAsync(s => s.Id == id);
+
+		if (student == null)
+		{
+			return NotFound();
+		}
+
+		var isEnrolled = await _context.StudentEnrollments
+			.AnyAsync(e => e.StudentProfileId == student.Id);
+
+		if (isEnrolled)
+		{
+			TempData["Error"] = "Cannot delete this student because they are enrolled in a course.";
+			return RedirectToAction(nameof(Index));
+		}
+
+		var user = student.User;
+
+		_context.StudentProfiles.Remove(student);
+		await _context.SaveChangesAsync();
+
+		if (user != null)
+		{
+			await _userManager.DeleteAsync(user);
+		}
+
+		TempData["Success"] = "Student deleted successfully.";
+		return RedirectToAction(nameof(Index));
+	}
+	[HttpPost]
+	[ValidateAntiForgeryToken]
+	public async Task<IActionResult> DeleteInstructor(int id)
+	{
+		var instructor = await _context.InstructorProfiles
+			.Include(i => i.User)
+			.FirstOrDefaultAsync(i => i.Id == id);
+
+		if (instructor == null)
+		{
+			return NotFound();
+		}
+
+		var isAssigned = await _context.CourseInstructors
+			.AnyAsync(ci => ci.InstructorProfileId == instructor.Id);
+
+		if (isAssigned)
+		{
+			TempData["Error"] = "Cannot delete this instructor because they are assigned to a course.";
+			return RedirectToAction(nameof(Index));
+		}
+
+		var user = instructor.User;
+
+		_context.InstructorProfiles.Remove(instructor);
+		await _context.SaveChangesAsync();
+
+		if (user != null)
+		{
+			await _userManager.DeleteAsync(user);
+		}
+
+		TempData["Success"] = "Instructor deleted successfully.";
+		return RedirectToAction(nameof(Index));
+	}
 }

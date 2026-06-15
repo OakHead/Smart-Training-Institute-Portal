@@ -22,14 +22,17 @@ namespace Smart_Training_Institute_Portal.Controllers
             _context = context;
         }
 
-        // GET: Departments
-        public async Task<IActionResult> Index()
-        {
-            return View(await _context.Departments.ToListAsync());
-        }
+		public async Task<IActionResult> Index()
+		{
+			var departments = await _context.Departments
+				.Include(d => d.Courses)
+				.ToListAsync();
 
-        // GET: Departments/Details/5
-        public async Task<IActionResult> Details(int? id)
+			return View(departments);
+		}
+
+		// GET: Departments/Details/5
+		public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
             {
@@ -137,7 +140,6 @@ namespace Smart_Training_Institute_Portal.Controllers
             return View(department);
         }
 
-		// POST: Departments/Delete/5
 		[HttpPost, ActionName("Delete")]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> DeleteConfirmed(int id)
@@ -157,6 +159,7 @@ namespace Smart_Training_Institute_Portal.Controllers
 			{
 				_context.Departments.Remove(department);
 				await _context.SaveChangesAsync();
+				TempData["Success"] = "Department deleted successfully.";
 			}
 
 			return RedirectToAction(nameof(Index));

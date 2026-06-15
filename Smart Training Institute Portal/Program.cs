@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Smart_Training_Institute_Portal.Data;
 using Smart_Training_Institute_Portal.Models;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +17,9 @@ builder.Services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfi
 	.AddEntityFrameworkStores<ApplicationDbContext>(); // Use the same ApplicationDbContext for Identity
 
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
@@ -51,6 +55,8 @@ app.MapControllerRoute(
 
 app.MapRazorPages()
    .WithStaticAssets();
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.Run();
 

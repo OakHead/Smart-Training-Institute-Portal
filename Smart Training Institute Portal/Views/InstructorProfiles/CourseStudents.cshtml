@@ -66,11 +66,14 @@
                                     </td>
 
                                     <td>
-                                        <input type="text"
-                                               name="grades"
-                                               value="@enrollment.Grade"
-                                               class="form-control"
-                                               placeholder="A, B, C..." />
+                                        @if (!string.IsNullOrWhiteSpace(enrollment.Grade))
+                                        {
+                                            <span class="badge bg-success">@enrollment.Grade</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning text-dark">Pending</span>
+                                        }
                                     </td>
 
                                     <td>

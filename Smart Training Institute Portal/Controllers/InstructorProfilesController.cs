@@ -193,54 +193,58 @@ namespace Smart_Training_Institute_Portal.Controllers
 
 			return View(courses);
 		}
-		[Authorize(Roles = "Admin,Instructor")]
+		[Authorize(Roles = "Instructor")]
 		public async Task<IActionResult> AddStudent(int courseId)
 		{
 			ViewBag.Course = await _context.Courses.FindAsync(courseId);
-
-			ViewBag.Students = new SelectList(
-				await _context.StudentProfiles
-					.Include(s => s.User)
-					.ToListAsync(),
-				"Id",
-				"User.FullName"
-			);
-
 			ViewBag.CourseId = courseId;
+
+			var enrolledStudentIds = await _context.StudentEnrollments
+				.Where(e => e.CourseId == courseId)
+				.Select(e => e.StudentProfileId)
+				.ToListAsync();
+
+			ViewBag.AvailableStudents = await _context.StudentProfiles
+				.Include(s => s.User)
+				.Where(s => !enrolledStudentIds.Contains(s.Id))
+				.ToListAsync();
+
+			ViewBag.EnrolledStudents = await _context.StudentEnrollments
+				.Include(e => e.StudentProfile)
+					.ThenInclude(s => s.User)
+				.Where(e => e.CourseId == courseId)
+				.ToListAsync();
 
 			return View();
 		}
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		[Authorize(Roles = "Admin,Instructor")]
-		public async Task<IActionResult> AddStudent(int courseId, int studentProfileId)
+		[Authorize(Roles = "Instructor")]
+		public async Task<IActionResult> AddStudent(int courseId, int[] studentProfileIds)
 		{
-			var exists = await _context.StudentEnrollments.AnyAsync(e =>
-				e.CourseId == courseId &&
-				e.StudentProfileId == studentProfileId);
-
-			if (exists)
+			foreach (var studentId in studentProfileIds)
 			{
-				TempData["Error"] = "Student is already enrolled in this course.";
-				return RedirectToAction(nameof(AddStudent), new { courseId });
+				var exists = await _context.StudentEnrollments.AnyAsync(e =>
+					e.CourseId == courseId &&
+					e.StudentProfileId == studentId);
+
+				if (!exists)
+				{
+					_context.StudentEnrollments.Add(new StudentEnrollment
+					{
+						CourseId = courseId,
+						StudentProfileId = studentId,
+						EnrollmentDate = DateTime.Now,
+						Status = "Enrolled"
+					});
+				}
 			}
 
-			var enrollment = new StudentEnrollment
-			{
-				CourseId = courseId,
-				StudentProfileId = studentProfileId,
-				EnrollmentDate = DateTime.Now,
-				Status = "Enrolled"
-			};
-
-			_context.StudentEnrollments.Add(enrollment);
 			await _context.SaveChangesAsync();
 
-			TempData["Success"] = "Student added successfully.";
-
-			return RedirectToAction(nameof(MyCourses));
+			return RedirectToAction(nameof(AddStudent), new { courseId });
 		}
-		[Authorize(Roles = "Admin,Instructor")]
+		[Authorize(Roles = "Instructor")]
 		public async Task<IActionResult> CourseStudents(int courseId)
 		{
 			var course = await _context.Courses
@@ -264,25 +268,87 @@ namespace Smart_Training_Institute_Portal.Controllers
 		}
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		[Authorize(Roles = "Admin,Instructor")]
-		public async Task<IActionResult> UpdateMarks(int courseId, int[] enrollmentIds, decimal?[] marks, string[] grades)
+		public async Task<IActionResult> RemoveStudentEnrollment(int enrollmentId, int courseId)
+		{
+			var enrollment = await _context.StudentEnrollments.FindAsync(enrollmentId);
+
+			if (enrollment == null)
+			{
+				return NotFound();
+			}
+
+			_context.StudentEnrollments.Remove(enrollment);
+			await _context.SaveChangesAsync();
+
+			TempData["Success"] = "Student removed from course successfully.";
+
+			return RedirectToAction(nameof(AddStudent), new { courseId });
+		}
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		[Authorize(Roles = "Instructor")]
+		public async Task<IActionResult> UpdateMarks(int courseId, int[] enrollmentIds, decimal?[] marks)
 		{
 			for (int i = 0; i < enrollmentIds.Length; i++)
 			{
-				var enrollment = await _context.StudentEnrollments.FindAsync(enrollmentIds[i]);
+				var enrollment = await _context.StudentEnrollments
+					.Include(e => e.StudentProfile)
+						.ThenInclude(s => s.Enrollments)
+					.FirstOrDefaultAsync(e => e.Id == enrollmentIds[i]);
 
 				if (enrollment != null)
 				{
 					enrollment.Mark = marks[i];
-					enrollment.Grade = grades[i];
+
+					if (marks[i].HasValue)
+					{
+						enrollment.Grade = GetGrade(marks[i].Value);
+					}
+					else
+					{
+						enrollment.Grade = null;
+					}
+
+					var student = enrollment.StudentProfile;
+
+					decimal totalPoints = 0;
+					int gradedCourses = 0;
+
+					foreach (var studentEnrollment in student.Enrollments)
+					{
+						if (studentEnrollment.Mark.HasValue)
+						{
+							totalPoints += GetGradePoints(studentEnrollment.Mark.Value);
+							gradedCourses++;
+						}
+					}
+
+					student.GPA = gradedCourses > 0 ? totalPoints / gradedCourses : null;
 				}
 			}
 
 			await _context.SaveChangesAsync();
 
-			TempData["Success"] = "Marks updated successfully.";
+			TempData["Success"] = "Marks, grades, and GPA updated successfully.";
 
 			return RedirectToAction(nameof(CourseStudents), new { courseId });
+		}
+		private string GetGrade(decimal mark)
+		{
+			if (mark >= 90) return "A";
+			if (mark >= 80) return "B";
+			if (mark >= 70) return "C";
+			if (mark >= 60) return "D";
+			return "F";
+		}
+
+		private decimal GetGradePoints(decimal mark)
+		{
+			if (mark >= 90) return 4.0m;
+			if (mark >= 80) return 3.0m;
+			if (mark >= 70) return 2.0m;
+			if (mark >= 60) return 1.0m;
+			return 0.0m;
 		}
 	}
 }

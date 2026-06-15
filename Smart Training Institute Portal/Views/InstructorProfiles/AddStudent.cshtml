@@ -3,45 +3,66 @@
     var course = ViewBag.Course as Smart_Training_Institute_Portal.Models.Course;
 }
 
-<div class="container mt-4">
-    <div class="card shadow-sm border-0">
-        <div class="card-header bg-primary text-white">
-            <h4 class="mb-0">Add Student to Course</h4>
+<div class="mb-3">
+    <label class="form-label">Available Students</label>
+
+    @if (ViewBag.AvailableStudents != null && ViewBag.AvailableStudents.Count > 0)
+    {
+        @foreach (var student in ViewBag.AvailableStudents)
+        {
+            <div class="form-check">
+                <input class="form-check-input"
+                       type="checkbox"
+                       name="studentProfileIds"
+                       value="@student.Id" />
+
+                <label class="form-check-label">
+                    @student.User.FullName - @student.StudentId
+                </label>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="alert alert-info">
+            All students are already enrolled in this course.
         </div>
+    }
+</div>
 
-        <div class="card-body">
-            <h5>@course?.Title</h5>
-            <p class="text-muted">@course?.CourseCode</p>
+<div class="mb-3">
+    <label class="form-label">Already Enrolled</label>
 
-            @if (TempData["Error"] != null)
+    @if (ViewBag.EnrolledStudents != null && ViewBag.EnrolledStudents.Count > 0)
+    {
+        <ul class="list-group">
+            @foreach (var enrollment in ViewBag.EnrolledStudents)
             {
-                <div class="alert alert-danger">
-                    @TempData["Error"]
-                </div>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>
+                        @enrollment.StudentProfile.User.FullName - @enrollment.StudentProfile.StudentId
+                    </span>
+
+                    <form asp-action="RemoveStudentEnrollment"
+                          method="post"
+                          class="d-inline">
+                        <input type="hidden" name="enrollmentId" value="@enrollment.Id" />
+                        <input type="hidden" name="courseId" value="@ViewBag.CourseId" />
+
+                        <button type="submit"
+                                class="btn btn-sm btn-outline-danger"
+                                onclick="return confirm('Remove this student from the course?');">
+                            Remove
+                        </button>
+                    </form>
+                </li>
             }
-
-            @if (TempData["Success"] != null)
-            {
-                <div class="alert alert-success">
-                    @TempData["Success"]
-                </div>
-            }
-
-            <form asp-action="AddStudent" method="post">
-                <input type="hidden" name="courseId" value="@ViewBag.CourseId" />
-
-                <div class="mb-3">
-                    <label class="form-label">Student</label>
-                    <select name="studentProfileId" class="form-select" asp-items="ViewBag.Students">
-                        <option value="">-- Select Student --</option>
-                    </select>
-                </div>
-
-                <div class="d-flex justify-content-between">
-                    <a asp-action="MyCourses" class="btn btn-secondary">Back</a>
-                    <button type="submit" class="btn btn-primary">Add Student</button>
-                </div>
-            </form>
+        </ul>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            No students enrolled yet.
         </div>
-    </div>
+    }
 </div>

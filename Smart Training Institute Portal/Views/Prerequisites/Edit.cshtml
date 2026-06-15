@@ -1,41 +1,34 @@
 ﻿@model Smart_Training_Institute_Portal.Models.Prerequisite
 
 @{
-    ViewData["Title"] = "Create Prerequisite";
+    ViewData["Title"] = "Edit Prerequisite";
 }
 
 <div class="container mt-4">
     <div class="card shadow-sm border-0">
         <div class="card-header bg-primary text-white">
-            <h4 class="mb-0">Create Prerequisite</h4>
+            <h4 class="mb-0">Edit Prerequisite</h4>
         </div>
 
         <div class="card-body">
-            <form asp-action="Create">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            @using (Html.BeginForm("Edit", "Prerequisites", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(model => model.Id)
+
+                @Html.ValidationSummary(true, "", new { @class = "text-danger mb-3" })
 
                 <div class="mb-3">
-                    <label asp-for="Name" class="form-label"></label>
-                    <input asp-for="Name" class="form-control" />
-                    <span asp-validation-for="Name" class="text-danger"></span>
+                    @Html.LabelFor(model => model.Name, new { @class = "form-label" })
+                    @Html.TextBoxFor(model => model.Name, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
                 </div>
 
                 <div class="d-flex justify-content-between">
-                    <a asp-action="Index" class="btn btn-secondary">
-                        Back
-                    </a>
-
-                    <button type="submit" class="btn btn-primary">
-                        Create
-                    </button>
+                    @Html.ActionLink("Back to List", "Index", null, new { @class = "btn btn-secondary" })
+                    <button type="submit" class="btn btn-primary">Save</button>
                 </div>
-            </form>
+            }
         </div>
     </div>
 </div>
-
-@section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
-}

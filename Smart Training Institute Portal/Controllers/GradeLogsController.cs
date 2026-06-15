@@ -43,9 +43,9 @@ namespace Smart_Training_Institute_Portal.Controllers
 
             var gradeLog = await _context.GradeLogs
 				.Include(g => g.StudentEnrollment)
-				.ThenInclude(e => e.StudentProfile)
+				    .ThenInclude(e => e.StudentProfile)
 				.Include(g => g.StudentEnrollment)
-				.ThenInclude(e => e.Course)
+				    .ThenInclude(e => e.Course)
 				.Include(g => g.UpdatedBy)
 				.FirstOrDefaultAsync(m => m.Id == id);
             if (gradeLog == null)

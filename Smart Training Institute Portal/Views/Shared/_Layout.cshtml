@@ -3,90 +3,108 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Smart_Training_Institute_Portal</title>
-    <script type="importmap"></script>
+    <title>@ViewData["Title"] - Smart Training Institute</title>
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Smart_Training_Institute_Portal.styles.css" asp-append-version="true" />
 </head>
-<body>
+
+<body class="bg-light">
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Smart_Training_Institute_Portal</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+            <div class="container">
+                <a class="navbar-brand fw-bold" asp-controller="Home" asp-action="Index">
+                    Smart Training Institute
+                </a>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+
+                <div class="collapse navbar-collapse" id="mainNavbar">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Courses" asp-action="Catalog">Catalog</a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="InstructorProfiles" asp-action="Index">Instructors</a>
+                        </li>
+
                         @if (User.IsInRole("Admin"))
                         {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Users" asp-action="Index">Manage Users</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Courses" asp-action="Index"> Manage Courses</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Prerequisites" asp-action="Index"> Manage Prerequisites</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Departments" asp-action="Index">Manage Departments</a>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                    Admin
+                                </a>
+
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Users" asp-action="Index">Manage Users</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Courses" asp-action="Index">Manage Courses</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Prerequisites" asp-action="Index">Manage Prerequisites</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Departments" asp-action="Index">Manage Departments</a>
+                                    </li>
+                                </ul>
                             </li>
                         }
+
                         @if (User.IsInRole("Instructor"))
                         {
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="InstructorProfiles" asp-action="MyCourses"> My Courses </a>
-                            </li>
-						}
-                        @if (User.IsInRole("Student"))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link"
-                                   asp-controller="StudentProfiles"
-                                   asp-action="MyCourses">
+                                <a class="nav-link" asp-controller="InstructorProfiles" asp-action="MyCourses">
                                     My Courses
                                 </a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link"
-                                   asp-controller="StudentProfiles"
-                                   asp-action="PerformanceSummary">
-                                    Performance Summary
-                                </a>
-                            </li>
-						}
-                        @if (!User.Identity.IsAuthenticated)
+                        }
+
+                        @if (User.IsInRole("Student"))
                         {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Login">Nth</a>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                    Student
+                                </a>
+
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="StudentProfiles" asp-action="MyCourses">My Courses</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="StudentProfiles" asp-action="PerformanceSummary">Performance Summary</a>
+                                    </li>
+                                </ul>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Register">Nth</a>
-                            </li>
-						}
+                        }
                     </ul>
+
                     <partial name="_LoginPartial" />
                 </div>
             </div>
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - Smart_Training_Institute_Portal - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <main class="container py-4">
+        @RenderBody()
+    </main>
+
+    <footer class="bg-white border-top text-muted py-3 mt-5">
+        <div class="container text-center">
+            &copy; 2026 - Smart Training Institute Portal
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

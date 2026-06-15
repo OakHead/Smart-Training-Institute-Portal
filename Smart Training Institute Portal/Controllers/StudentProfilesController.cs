@@ -207,35 +207,9 @@ namespace Smart_Training_Institute_Portal.Controllers
 			{
 				return NotFound();
 			}
-			decimal totalPoints = 0;
-			int gradedCourses = 0;
-
-			foreach (var enrollment in student.Enrollments)
-			{
-				if (enrollment.Mark.HasValue)
-				{
-					decimal mark = enrollment.Mark.Value;
-					decimal points;
-
-					if (mark >= 90)
-						points = 4.0m;
-					else if (mark >= 80)
-						points = 3.0m;
-					else if (mark >= 70)
-						points = 2.0m;
-					else if (mark >= 60)
-						points = 1.0m;
-					else
-						points = 0.0m;
-
-					totalPoints += points;
-					gradedCourses++;
-				}
-			}
-
-			student.GPA = gradedCourses > 0 ? totalPoints / gradedCourses : null;
 
 			return View(student);
 		}
+		
 	}
 }

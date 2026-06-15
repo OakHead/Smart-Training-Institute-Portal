@@ -1,65 +1,133 @@
 ﻿@model IEnumerable<Smart_Training_Institute_Portal.Models.Department>
 
 @{
-    ViewData["Title"] = "Index";
+	ViewData["Title"] = "Departments";
 }
 @if (TempData["Error"] != null)
 {
-    <div class="alert alert-danger">
-        @TempData["Error"]
-    </div>
+	<div class="alert alert-danger">
+		@TempData["Error"]
+	</div>
 }
 
-<h1>Index</h1>
-
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CreatedDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.UpdatedDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DeleteDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IsDeleted)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreatedDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.UpdatedDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DeleteDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IsDeleted)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
+@if (TempData["Success"] != null)
+{
+	<div class="alert alert-success">
+		@TempData["Success"]
+	</div>
 }
-    </tbody>
-</table>
+
+<div class="container mt-4">
+
+	<div class="d-flex justify-content-between align-items-center mb-4">
+		<div>
+			<h2 class="fw-bold">Departments</h2>
+			<p class="text-muted">Manage academic departments</p>
+		</div>
+
+		@Html.ActionLink("+ Create Department", "Create", null,
+		new { @class = "btn btn-primary" })
+	</div>
+
+	<div class="card shadow-sm border-0">
+		<div class="card-body">
+
+			@if (!Model.Any())
+			{
+				<div class="alert alert-info">
+					No departments found.
+				</div>
+			}
+			else
+			{
+				<table class="table table-hover align-middle">
+					<thead class="table-light">
+						<tr>
+							<th>Name</th>
+							<th>Courses</th>
+							<th class="text-end">Actions</th>
+						</tr>
+					</thead>
+
+					<tbody>
+						@foreach (var item in Model)
+						{
+							<tr>
+								<td>
+									<strong>@item.Name</strong>
+								</td>
+
+								<td>
+									<span class="badge bg-primary">
+										@(item.Courses?.Count ?? 0)
+									</span>
+								</td>
+
+								<td class="text-end">
+									@Html.ActionLink("Edit", "Edit",
+									new { id = item.Id },
+														new { @class = "btn btn-sm btn-outline-primary me-1" })
+							@Html.ActionLink("Details", "Details",
+														new { id = item.Id },
+														new { @class = "btn btn-sm btn-outline-secondary me-1" })
+							<button type="button"
+									class="btn btn-sm btn-outline-danger"
+									onclick="openDeleteModal('@item.Id', '@item.Name')">
+								Delete
+							</button>
+						</td>
+					</tr>
+										}
+					</tbody>
+				</table>
+			}
+
+		</div>
+	</div>
+</div>
+<div class="modal fade" id="deleteDepartmentModal" tabindex="-1">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<form id="deleteDepartmentForm" method="post">
+				@Html.AntiForgeryToken()
+
+				<div class="modal-header bg-danger text-white">
+					<h5 class="modal-title">Delete Department</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+				</div>
+
+				<div class="modal-body">
+					Are you sure you want to delete
+					<strong id="departmentName"></strong>?
+				</div>
+
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+						Cancel
+					</button>
+
+					<button type="submit" class="btn btn-danger">
+						Delete
+					</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+@section Scripts {
+	<script>
+		function openDeleteModal(id, name) {
+			document.getElementById("departmentName").innerText = name;
+
+			document.getElementById("deleteDepartmentForm").action =
+				"/Departments/Delete/" + id;
+
+			var modal = new bootstrap.Modal(
+				document.getElementById("deleteDepartmentModal")
+			);
+
+			modal.show();
+		}
+	</script>
+}
